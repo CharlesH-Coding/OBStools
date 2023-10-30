@@ -30,7 +30,7 @@ import os as _os
 
 def AuditEventFolder(eventsfolder,parseby='SAC',Minmag=6.3,Maxmag=6.7):
         catalog = _get_event_catalog(eventsfolder)
-        stations, stations_set = GetStationCatalog()
+        stations_set = GetStationCatalog()
         cols = stations_set.columns.tolist()
 
         client = _Client()
@@ -75,22 +75,14 @@ def AuditEventFolder(eventsfolder,parseby='SAC',Minmag=6.3,Maxmag=6.7):
                 catalog = catalog[cols]
         return catalog
 
-def GetStationCatalog():
+def GetStationCatalog(stas=None):
         '''Janiszewski_etal_2023_StationList.xlsx can be cited by the following,
-        
+
         Helen A Janiszewski, Z Eilon, J B Russell, B Brunsvik, J B Gaherty, S G Mosher, W B Hawley, S Coats, "Broad-band ocean bottom seismometer noise properties: Supplementary Material", Geophysical Journal International, Volume 233, Issue 1, April 2023, Pages 297–315
         '''
         current_path = _os.path.dirname(__file__)
         excelfile = current_path + '/Janiszewski_etal_2023_StationList.xlsx'
 
-        stas = [
-        '7D.FN07A','7D.FN07C','7D.FN12C','7D.FN14A','7D.FS15B','7D.G03A','7D.G03D','7D.G04D',
-        '7D.G34D','7D.J11B','7D.J26C','7D.J41C','7D.J42C','7D.J46C','7D.J59C','7D.M07A','7D.M08A',
-        'XO.LA33','XO.LA34','XO.LD40','XO.LD41',
-        'XE.CC04','XE.CC05','XE.CC06','XE.CC08','XE.CC11',
-        'ZA.B01','ZA.B02','ZA.B04','ZA.B05','ZA.B06',
-        'YS.PL33','YS.PL62','YS.PL68',
-        ]
         cols = [
         'Station','Network','Latitude (deg)','Longitude (deg)',
         'Experiment','Instrument Design','Seismometer','Environment','Pressure Gauge',
@@ -112,13 +104,12 @@ def GetStationCatalog():
         stations = stations.assign(Averaging=_pd.Series())
         stations = stations.assign(Events=_pd.Series())
         stations = stations.assign(Files=_pd.Series())
-        stations_subset = stations.iloc[_np.where(_np.isin(_np.array(stations['StaName']),stas))]
-        stations_subset = stations_subset[cols]
-        stations_subset = stations_subset.sort_values(by=['Network','Station'])
-        stations_subset = stations_subset.reset_index(drop=True)
+        if stas is not None:
+                stations = stations.iloc[_np.where(_np.isin(_np.array(stations['StaName']),stas))]
+                stations = stations[cols]
         stations = stations.sort_values(by=['Network','Station'])
         stations = stations.reset_index(drop=True)
-        return stations,stations_subset
+        return stations
 
 def Get_ATaCR_Dirs(CompFolder):
         ATaCR_Py_DataFolder = dict()
