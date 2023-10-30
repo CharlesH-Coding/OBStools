@@ -115,3 +115,4 @@ __author__ = 'Pascal Audet & Helen Janiszewski'
 
 from . import atacr
 from . import comply
+from . import utilities
